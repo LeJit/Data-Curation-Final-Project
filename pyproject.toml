@@ -1,0 +1,19 @@
+[project]
+name = "final-project"
+version = "0.1.0"
+description = "Manojit Nandi's final project for Foundation of Data Curation"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "cecil>=0.0.21",
+    "earthengine-api>=1.6.9",
+    "felt-python>=0.1.2",
+    "geemap>=0.36.3",
+    "geopandas>=1.1.1",
+    "marimo>=0.15.3",
+    "python-dotenv>=1.1.1",
+    "xarray>=2025.6.1",
+]
+
+[tool.marimo.runtime]
+dotenv = [".env", ".env.testing"]

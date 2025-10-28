@@ -1,0 +1,39 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Colossus_Data_Center_AOI_10_Hectares_Plus",
+        "description": "Expanded to approximately 11.2 hectares."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -90.065,
+              35.042
+            ],
+            [
+              -90.065,
+              35.050
+            ],
+            [
+              -90.051,
+              35.050
+            ],
+            [
+              -90.051,
+              35.042
+            ],
+            [
+              -90.065,
+              35.042
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
