@@ -1,7 +1,17 @@
 import marimo
 
-__generated_with = "0.16.5"
+__generated_with = "0.18.1"
 app = marimo.App(width="medium")
+
+
+app._unparsable_cell(
+    r"""
+    # Initialization code that runs before all other cells
+    def create_cecil_api_call(client: cecil.Client, dataset_id: str, dataset_name: str, aoi_id: str):
+    
+    """,
+    name="setup"
+)
 
 
 @app.cell
@@ -31,6 +41,12 @@ def _():
 
 
 @app.cell
+def _():
+    import xarray
+    return
+
+
+@app.cell
 def _(load_dotenv):
     load_dotenv()
     return
@@ -38,7 +54,9 @@ def _(load_dotenv):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""# Load Cecil Client""")
+    mo.md(r"""
+    # Load Cecil Client
+    """)
     return
 
 
@@ -48,9 +66,25 @@ def _(cecil):
     return (cecil_client,)
 
 
+@app.cell
+def _():
+    CECIL_DATASETS = {
+        "SBTN - Colossus": 'bf249342-557a-4028-922c-c67fc4ad6a64',
+        "Impact Observation - Colossus": 'a4bb9aea-b6df-4d19-9083-38357f8fa76c'
+    }
+    return
+
+
+@app.cell
+def _():
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""## Area of Interest (AOI)""")
+    mo.md(r"""
+    ## Area of Interest (AOI)
+    """)
     return
 
 
@@ -80,13 +114,13 @@ def _(cecil_client, colossus_geometry):
 
 @app.cell
 def _(aoi_colossus):
+    aoi_id_ = aoi_colossus.id
     print(aoi_colossus)
-    return
+    return (aoi_id_,)
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""# Land Cover 9-Class""")
+@app.cell
+def _():
     return
 
 
@@ -97,37 +131,74 @@ def _():
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""# SBTN Natural Lands Dataset (2000)""")
+    mo.md(r"""
+    # SBTN Natural Lands Dataset (2000)
+    """)
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""The documentation for the _SBTN Natural Lands data_ can be found """)
+    mo.md(r"""
+    The documentation for the _SBTN Natural Lands data_ can be found
+    """)
     return
 
 
-app._unparsable_cell(
-    r"""
-    sbtn_natural_lands_colossus = cecil_client.create_data_request(
-        externel_ref=\"SBTN Natrual Lands - Colossus Data Center\"
-        aoi_id=
-        dataset_id='a4bb9aea-b6df-4d19-9083-38357f8fa76c' 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Impact Observatory - Land Cover 9-Class
+    """)
+    return
+
+
+@app.cell
+def _(aoi_id_, cecil_client):
+    sbtn_natural_lands_colossus = cecil_client.create_subscription(
+        aoi_id=aoi_id_,
+        dataset_id='a4bb9aea-b6df-4d19-9083-38357f8fa76c',
+        external_ref="SBTN - Colossus"
     )
-    """,
-    name="_"
-)
+    return (sbtn_natural_lands_colossus,)
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""#""")
+@app.cell
+def _(sbtn_natural_lands_colossus):
+    sbtn_sub_id_ = sbtn_natural_lands_colossus.id
+    return (sbtn_sub_id_,)
+
+
+@app.cell
+def _(cecil_client, sbtn_sub_id_):
+    sbtn_dataset = cecil_client.load_xarray(sbtn_sub_id_)
+    return (sbtn_dataset,)
+
+
+@app.cell
+def _(sbtn_dataset):
+    sbtn_dataset
+    return
+
+
+@app.cell
+def _():
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r""" """)
+    mo.md(r"""
+    #
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+ 
+    """)
     return
 
 
