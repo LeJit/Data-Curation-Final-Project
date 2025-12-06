@@ -1,0 +1,14 @@
+[
+    {
+        "id": "132d8368-1caf-4c8b-ba64-0dd416a5179e",
+        "name": "Land Cover 9-Class",
+        "dataset_id": "a4bb9aea-b6df-4d19-9083-38357f8fa76c",
+        "aoi_id": "68935c0d-8b33-4a62-ac7a-1e297651a6ae"
+    },
+    {
+        "id": "10d0ed3a-ea8f-4015-a69d-77b1ab27ad5e",
+        "name": "SBTN Natural Lands",
+        "dataset_id": "bf249342-557a-4028-922c-c67fc4ad6a64",
+        "aoi_id": "68935c0d-8b33-4a62-ac7a-1e297651a6ae"
+    }
+]

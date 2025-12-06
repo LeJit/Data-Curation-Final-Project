@@ -662,6 +662,7 @@ dependencies = [
     { name = "geopandas" },
     { name = "marimo" },
     { name = "python-dotenv" },
+    { name = "rioxarray" },
     { name = "xarray" },
     { name = "xee" },
 ]
@@ -675,6 +676,7 @@ requires-dist = [
     { name = "geopandas", specifier = ">=1.1.1" },
     { name = "marimo", specifier = ">=0.15.3" },
     { name = "python-dotenv", specifier = ">=1.1.1" },
+    { name = "rioxarray", specifier = ">=0.19.0" },
     { name = "xarray", specifier = ">=2025.6.1" },
     { name = "xee", specifier = ">=0.0.23" },
 ]
