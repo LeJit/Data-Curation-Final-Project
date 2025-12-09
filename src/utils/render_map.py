@@ -1,4 +1,46 @@
-<!DOCTYPE html>
+#!/usr/bin/env python3
+"""
+Script to render a GeoJSON file using OpenLayers in an interactive HTML map.
+"""
+
+import json
+import os
+import webbrowser
+from pathlib import Path
+
+
+def load_geojson(filepath):
+    """Load and parse a GeoJSON file."""
+    with open(filepath, 'r') as f:
+        return json.load(f)
+
+
+def calculate_center(geojson):
+    """Calculate the center point of the GeoJSON features."""
+    if geojson['type'] == 'FeatureCollection':
+        features = geojson['features']
+        if features:
+            # Get the first feature's coordinates
+            coords = features[0]['geometry']['coordinates'][0]
+            # Calculate center from bounding box
+            lons = [coord[0] for coord in coords]
+            lats = [coord[1] for coord in coords]
+            center_lon = (min(lons) + max(lons)) / 2
+            center_lat = (min(lats) + max(lats)) / 2
+            return [center_lon, center_lat]
+    return [0, 0]
+
+
+def generate_html(geojson_data, output_path='map.html'):
+    """Generate an HTML file with OpenLayers map displaying the GeoJSON data."""
+    
+    # Calculate center for the map
+    center = calculate_center(geojson_data)
+    
+    # Convert GeoJSON to JSON string for embedding
+    geojson_str = json.dumps(geojson_data, indent=2)
+    
+    html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -9,62 +51,62 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.2.0/ol.css">
     
     <style>
-        * {
+        * {{
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
+        }}
         
-        body {
+        body {{
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-        }
+        }}
         
-        header {
+        header {{
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             padding: 1.5rem 2rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+        }}
         
-        h1 {
+        h1 {{
             color: #2d3748;
             font-size: 1.8rem;
             font-weight: 700;
-        }
+        }}
         
-        .subtitle {
+        .subtitle {{
             color: #718096;
             font-size: 0.95rem;
             margin-top: 0.25rem;
-        }
+        }}
         
-        .container {
+        .container {{
             flex: 1;
             padding: 2rem;
             display: flex;
             gap: 1.5rem;
-        }
+        }}
         
-        .map-wrapper {
+        .map-wrapper {{
             flex: 1;
             background: white;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             position: relative;
-        }
+        }}
         
-        #map {
+        #map {{
             width: 100%;
             height: 100%;
             min-height: 600px;
-        }
+        }}
         
-        .info-panel {
+        .info-panel {{
             width: 320px;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -73,49 +115,49 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             max-height: calc(100vh - 200px);
             overflow-y: auto;
-        }
+        }}
         
-        .info-panel h2 {
+        .info-panel h2 {{
             color: #2d3748;
             font-size: 1.25rem;
             margin-bottom: 1rem;
             padding-bottom: 0.75rem;
             border-bottom: 2px solid #667eea;
-        }
+        }}
         
-        .info-item {
+        .info-item {{
             margin-bottom: 1.25rem;
             padding: 1rem;
             background: #f7fafc;
             border-radius: 8px;
             border-left: 4px solid #667eea;
-        }
+        }}
         
-        .info-label {
+        .info-label {{
             font-weight: 600;
             color: #4a5568;
             font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 0.5rem;
-        }
+        }}
         
-        .info-value {
+        .info-value {{
             color: #2d3748;
             font-size: 1rem;
             word-wrap: break-word;
-        }
+        }}
         
-        .coordinates {
+        .coordinates {{
             font-family: 'Courier New', monospace;
             font-size: 0.85rem;
             background: #edf2f7;
             padding: 0.5rem;
             border-radius: 4px;
             margin-top: 0.5rem;
-        }
+        }}
         
-        .ol-popup {
+        .ol-popup {{
             position: absolute;
             background-color: white;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -125,9 +167,9 @@
             bottom: 12px;
             left: -50px;
             min-width: 200px;
-        }
+        }}
         
-        .ol-popup:after, .ol-popup:before {
+        .ol-popup:after, .ol-popup:before {{
             top: 100%;
             border: solid transparent;
             content: " ";
@@ -135,23 +177,23 @@
             width: 0;
             position: absolute;
             pointer-events: none;
-        }
+        }}
         
-        .ol-popup:after {
+        .ol-popup:after {{
             border-top-color: white;
             border-width: 10px;
             left: 48px;
             margin-left: -10px;
-        }
+        }}
         
-        .ol-popup:before {
+        .ol-popup:before {{
             border-top-color: #e2e8f0;
             border-width: 11px;
             left: 48px;
             margin-left: -11px;
-        }
+        }}
         
-        .ol-popup-closer {
+        .ol-popup-closer {{
             text-decoration: none;
             position: absolute;
             top: 8px;
@@ -159,26 +201,26 @@
             color: #718096;
             font-size: 1.2rem;
             cursor: pointer;
-        }
+        }}
         
-        .ol-popup-closer:hover {
+        .ol-popup-closer:hover {{
             color: #2d3748;
-        }
+        }}
         
-        #popup-content {
+        #popup-content {{
             margin-top: 8px;
-        }
+        }}
         
-        @media (max-width: 768px) {
-            .container {
+        @media (max-width: 768px) {{
+            .container {{
                 flex-direction: column;
-            }
+            }}
             
-            .info-panel {
+            .info-panel {{
                 width: 100%;
                 max-height: 300px;
-            }
-        }
+            }}
+        }}
     </style>
 </head>
 <body>
@@ -207,142 +249,102 @@
     
     <script>
         // GeoJSON data
-        const geojsonData = {
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "properties": {
-        "Name": "Colossus Data Center",
-        "Description": "Approximately 104 hectares.",
-        "Address": "5420 Tulane Road, Memphis, Tennessee 38109, United States"
-      },
-      "geometry": {
-        "coordinates": [
-          [
-            [
-              -90.04038044594203,
-              35.001573785257676
-            ],
-            [
-              -90.04038044594203,
-              34.991999431916426
-            ],
-            [
-              -90.02962540989337,
-              34.991999431916426
-            ],
-            [
-              -90.02962540989337,
-              35.001573785257676
-            ],
-            [
-              -90.04038044594203,
-              35.001573785257676
-            ]
-          ]
-        ],
-        "type": "Polygon"
-      },
-      "id": 1
-    }
-  ]
-};
+        const geojsonData = {geojson_str};
         
         // Create the map
-        const map = new ol.Map({
+        const map = new ol.Map({{
             target: 'map',
             layers: [
                 // Base layer - OpenStreetMap
-                new ol.layer.Tile({
+                new ol.layer.Tile({{
                     source: new ol.source.OSM()
-                })
+                }})
             ],
-            view: new ol.View({
-                center: ol.proj.fromLonLat([-90.0350029279177, 34.99678660858705]),
+            view: new ol.View({{
+                center: ol.proj.fromLonLat([{center[0]}, {center[1]}]),
                 zoom: 14
-            })
-        });
+            }})
+        }});
         
         // Create vector source from GeoJSON
-        const vectorSource = new ol.source.Vector({
-            features: new ol.format.GeoJSON().readFeatures(geojsonData, {
+        const vectorSource = new ol.source.Vector({{
+            features: new ol.format.GeoJSON().readFeatures(geojsonData, {{
                 featureProjection: 'EPSG:3857'
-            })
-        });
+            }})
+        }});
         
         // Create vector layer with styling
-        const vectorLayer = new ol.layer.Vector({
+        const vectorLayer = new ol.layer.Vector({{
             source: vectorSource,
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
+            style: new ol.style.Style({{
+                stroke: new ol.style.Stroke({{
                     color: '#667eea',
                     width: 3
-                }),
-                fill: new ol.style.Fill({
+                }}),
+                fill: new ol.style.Fill({{
                     color: 'rgba(102, 126, 234, 0.3)'
-                })
-            })
-        });
+                }})
+            }})
+        }});
         
         map.addLayer(vectorLayer);
         
         // Fit the map to the extent of the features
         const extent = vectorSource.getExtent();
-        map.getView().fit(extent, {
+        map.getView().fit(extent, {{
             padding: [50, 50, 50, 50],
             duration: 1000
-        });
+        }});
         
         // Display feature information in the info panel
-        function displayFeatureInfo() {
+        function displayFeatureInfo() {{
             const features = vectorSource.getFeatures();
             const infoDiv = document.getElementById('feature-info');
             
-            if (features.length === 0) {
+            if (features.length === 0) {{
                 infoDiv.innerHTML = '<p>No features found</p>';
                 return;
-            }
+            }}
             
             let html = '';
-            features.forEach((feature, index) => {
+            features.forEach((feature, index) => {{
                 const properties = feature.getProperties();
                 const geometry = feature.getGeometry();
                 
                 html += `<div class="info-item">`;
-                html += `<div class="info-label">Feature ${index + 1}</div>`;
+                html += `<div class="info-label">Feature ${{index + 1}}</div>`;
                 
                 // Display properties
-                for (const [key, value] of Object.entries(properties)) {
-                    if (key !== 'geometry') {
+                for (const [key, value] of Object.entries(properties)) {{
+                    if (key !== 'geometry') {{
                         html += `<div style="margin-top: 0.75rem;">`;
-                        html += `<div class="info-label">${key}</div>`;
-                        html += `<div class="info-value">${value}</div>`;
+                        html += `<div class="info-label">${{key}}</div>`;
+                        html += `<div class="info-value">${{value}}</div>`;
                         html += `</div>`;
-                    }
-                }
+                    }}
+                }}
                 
                 // Display geometry type
                 html += `<div style="margin-top: 0.75rem;">`;
                 html += `<div class="info-label">Geometry Type</div>`;
-                html += `<div class="info-value">${geometry.getType()}</div>`;
+                html += `<div class="info-value">${{geometry.getType()}}</div>`;
                 html += `</div>`;
                 
                 // Calculate and display area for polygons
-                if (geometry.getType() === 'Polygon') {
+                if (geometry.getType() === 'Polygon') {{
                     const area = ol.sphere.getArea(geometry);
                     const areaHectares = (area / 10000).toFixed(2);
                     html += `<div style="margin-top: 0.75rem;">`;
                     html += `<div class="info-label">Area</div>`;
-                    html += `<div class="info-value">${areaHectares} hectares</div>`;
+                    html += `<div class="info-value">${{areaHectares}} hectares</div>`;
                     html += `</div>`;
-                }
+                }}
                 
                 html += `</div>`;
-            });
+            }});
             
             infoDiv.innerHTML = html;
-        }
+        }}
         
         displayFeatureInfo();
         
@@ -351,53 +353,97 @@
         const content = document.getElementById('popup-content');
         const closer = document.getElementById('popup-closer');
         
-        const overlay = new ol.Overlay({
+        const overlay = new ol.Overlay({{
             element: container,
             autoPan: true,
-            autoPanAnimation: {
+            autoPanAnimation: {{
                 duration: 250
-            }
-        });
+            }}
+        }});
         
         map.addOverlay(overlay);
         
-        closer.onclick = function() {
+        closer.onclick = function() {{
             overlay.setPosition(undefined);
             closer.blur();
             return false;
-        };
+        }};
         
         // Display popup on click
-        map.on('click', function(evt) {
-            const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
+        map.on('click', function(evt) {{
+            const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {{
                 return feature;
-            });
+            }});
             
-            if (feature) {
+            if (feature) {{
                 const coordinates = evt.coordinate;
                 const properties = feature.getProperties();
                 
                 let popupHtml = '<div style="max-width: 250px;">';
-                for (const [key, value] of Object.entries(properties)) {
-                    if (key !== 'geometry') {
-                        popupHtml += `<div style="margin-bottom: 0.5rem;"><strong>${key}:</strong> ${value}</div>`;
-                    }
-                }
+                for (const [key, value] of Object.entries(properties)) {{
+                    if (key !== 'geometry') {{
+                        popupHtml += `<div style="margin-bottom: 0.5rem;"><strong>${{key}}:</strong> ${{value}}</div>`;
+                    }}
+                }}
                 popupHtml += '</div>';
                 
                 content.innerHTML = popupHtml;
                 overlay.setPosition(coordinates);
-            } else {
+            }} else {{
                 overlay.setPosition(undefined);
-            }
-        });
+            }}
+        }});
         
         // Change cursor on hover
-        map.on('pointermove', function(evt) {
+        map.on('pointermove', function(evt) {{
             const pixel = map.getEventPixel(evt.originalEvent);
             const hit = map.hasFeatureAtPixel(pixel);
             map.getTarget().style.cursor = hit ? 'pointer' : '';
-        });
+        }});
     </script>
 </body>
 </html>
+"""
+    
+    # Write the HTML file
+    with open(output_path, 'w') as f:
+        f.write(html_content)
+    
+    return output_path
+
+
+def main():
+    """Main function to generate and display the map."""
+    # Path to the GeoJSON file
+    # Go up 3 levels: src/utils/render_map.py -> src/utils -> src -> root
+    project_root = Path(__file__).resolve().parents[2]
+    geojson_path = project_root / 'data' / 'colossus.json'
+    
+    # Check if file exists
+    if not geojson_path.exists():
+        print(f"Error: GeoJSON file not found at {geojson_path}")
+        return
+    
+    print(f"Loading GeoJSON from: {geojson_path}")
+    
+    # Load the GeoJSON data
+    geojson_data = load_geojson(geojson_path)
+    
+    # Generate the HTML map
+    output_dir = project_root / 'outputs' / 'maps'
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / 'colossus_map.html'
+    html_file = generate_html(geojson_data, output_path)
+    
+    print(f"Map generated successfully: {html_file}")
+    print(f"\nOpening map in browser...")
+    
+    # Open the map in the default web browser
+    webbrowser.open(f'file://{os.path.abspath(html_file)}')
+    
+    print("\n✓ Done! The map should now be open in your browser.")
+    print(f"  If it doesn't open automatically, you can manually open: {os.path.abspath(html_file)}")
+
+
+if __name__ == '__main__':
+    main()

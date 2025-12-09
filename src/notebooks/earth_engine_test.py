@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.18.1"
+__generated_with = "0.18.3"
 app = marimo.App(width="medium")
 
 
@@ -65,7 +65,7 @@ def _():
     # Configuration parameters
     CONFIG = {
         'project_id': 'coursera-bigquery-359202', # Include 
-        'geojson_path': 'data/colossus.json',
+        'geojson_path': '../../data/colossus.json',
         'date_start': '2022-01-01',
         'date_end': '2023-01-01',
         'cloud_threshold': 5,
@@ -209,16 +209,6 @@ def _(Map):
 @app.cell
 def _(map_html, mo):
     mo.Html(map_html)
-    return
-
-
-@app.cell
-def _():
-    return
-
-
-@app.cell
-def _():
     return
 
 
