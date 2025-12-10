@@ -22,7 +22,7 @@ def _(mo):
     mo.md(r"""
     # Cecil Data Analysis
 
-    This notebook analyzes the Cecil subscriptions found in `../../data/processed/cecil_subscriptions.json`.
+    This notebook analyzes the Cecil subscriptions found in `data/processed/cecil_subscriptions.json`.
     """)
     return
 
@@ -35,10 +35,10 @@ def _(cecil):
 
 @app.cell
 def _(json, mo):
-    with open("../../data/processed/cecil_subscriptions.json", "r") as f:
+    with open("data/processed/cecil_subscriptions.json", "r") as f:
         subscriptions = json.load(f)
 
-    mo.md(f"Loaded {len(subscriptions)} subscriptions from `../../data/processed/cecil_subscriptions.json`.")
+    mo.md(f"Loaded {len(subscriptions)} subscriptions from `data/processed/cecil_subscriptions.json`.")
     return (subscriptions,)
 
 
@@ -72,16 +72,6 @@ def _(client, subscriptions):
         except Exception as e:
             results.append((sub, None, {"error": str(e)}))
     return (ds,)
-
-
-@app.cell
-def _():
-    return
-
-
-@app.cell
-def _():
-    return
 
 
 @app.cell
@@ -297,31 +287,31 @@ def _(pl):
     ) -> str:
         """
         Generate Markdown content for the land usage report.
-    
+
         Args:
             dataset: xarray Dataset containing the natural lands data
             stats_dataframe: Polars DataFrame with land usage statistics
             natural_data_array: numpy array with the natural lands data values
-        
+
         Returns:
             Markdown-formatted string containing the complete report
         """
         # Extract statistics
         natural_stats = stats_dataframe.filter(pl.col("Category") == "Natural")
         non_natural_stats = stats_dataframe.filter(pl.col("Category") == "Non-Natural")
-    
+
         natural_pct = natural_stats["Percentage"][0] if len(natural_stats) > 0 else 0
         non_natural_pct = non_natural_stats["Percentage"][0] if len(non_natural_stats) > 0 else 0
         natural_pixels = natural_stats["Pixels"][0] if len(natural_stats) > 0 else 0
         non_natural_pixels = non_natural_stats["Pixels"][0] if len(non_natural_stats) > 0 else 0
-    
+
         # Get dataset metadata
         total_pixels = natural_data_array.size
         spatial_resolution = abs(float(dataset.coords['x'][1] - dataset.coords['x'][0]))
-    
+
         # Generate report content
         report_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
+
         markdown_content = f"""# Memphis, Tennessee Land Usage Analysis Report
     ## Year 2000 - Natural vs Non-Natural Lands
 
@@ -470,42 +460,42 @@ def _(Path, alt, datetime):
     ) -> Path:
         """
         Save the Markdown report and associated chart figures to disk.
-    
+
         Args:
             markdown_content: Complete Markdown-formatted report content
             charts: Dictionary mapping chart names to Altair chart objects
                 Expected keys: 'pie', 'bar', 'spatial'
             output_dir: Directory to save the report and figures
-        
+
         Returns:
             Path to the generated Markdown file
         """
         # Create output directory if it doesn't exist
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
-    
+
         # Create figures subdirectory
         figures_path = output_path / "figures"
         figures_path.mkdir(exist_ok=True)
-    
+
         # Save all charts as PNG files
         chart_files = {
             'pie': figures_path / "land_usage_pie.png",
             'bar': figures_path / "land_usage_bar.png",
             'spatial': figures_path / "spatial_distribution.png"
         }
-    
+
         for chart_name, chart_obj in charts.items():
             if chart_name in chart_files:
                 chart_obj.save(str(chart_files[chart_name]))
-    
+
         # Generate timestamped filename
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         report_file = output_path / f"memphis_land_usage_report_{timestamp}.md"
-    
+
         # Save report to file
         report_file.write_text(markdown_content)
-    
+
         return report_file
     return (save_report_and_figures,)
 

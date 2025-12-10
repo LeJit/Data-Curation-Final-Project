@@ -22,7 +22,7 @@ def _():
 def _():
     import os
     from dotenv import load_dotenv
-    return (load_dotenv,)
+    return load_dotenv, os
 
 
 @app.cell
@@ -61,11 +61,11 @@ def _():
 
 
 @app.cell
-def _():
+def _(os):
     # Configuration parameters
     CONFIG = {
-        'project_id': 'coursera-bigquery-359202', # Include 
-        'geojson_path': '../../data/colossus.json',
+        'project_id': os.getenv('GEE_PROJECT_ID'), # Include 
+        'geojson_path': 'data/colossus.json',
         'date_start': '2022-01-01',
         'date_end': '2023-01-01',
         'cloud_threshold': 5,
@@ -120,30 +120,30 @@ def _(CONFIG, json):
 
 @app.cell
 def _(ee, expanded_geojson_data):
-    aoi_geometry_10ha = ee.FeatureCollection(expanded_geojson_data['features']).geometry()
-    return (aoi_geometry_10ha,)
+    aoi_geometry_104ha = ee.FeatureCollection(expanded_geojson_data['features']).geometry()
+    return (aoi_geometry_104ha,)
 
 
 @app.cell
-def _(CONFIG, aoi_geometry_10ha, ee):
+def _(CONFIG, aoi_geometry_104ha, ee):
     L8_collection = (ee.ImageCollection(CONFIG['satellite']) \
         .filterDate(CONFIG['date_start'], CONFIG['date_end']) \
-        .filterBounds(aoi_geometry_10ha)
+        .filterBounds(aoi_geometry_104ha)
         .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', CONFIG['cloud_threshold'])))
     return (L8_collection,)
 
 
 @app.cell
-def _(CONFIG, aoi_geometry_10ha):
+def _(CONFIG, aoi_geometry_104ha):
     # Use bounded operation to avoid memory issues with large geometries
-    centroid_info = aoi_geometry_10ha.centroid(maxError=CONFIG['scale']).getInfo()
+    centroid_info = aoi_geometry_104ha.centroid(maxError=CONFIG['scale']).getInfo()
     print(f"Expanded AOI successfully loaded. Center: {centroid_info['coordinates']}")
     return
 
 
 @app.cell
-def _(L8_collection, aoi_geometry_10ha):
-    median_composite = L8_collection.median().clip(aoi_geometry_10ha)
+def _(L8_collection, aoi_geometry_104ha):
+    median_composite = L8_collection.median().clip(aoi_geometry_104ha)
     return (median_composite,)
 
 
@@ -195,8 +195,8 @@ def _(Map, aoi_geometry_10ha):
 
 
 @app.cell
-def _(CONFIG, Map, aoi_geometry_10ha):
-    Map.centerObject(aoi_geometry_10ha, CONFIG['zoom_level'])
+def _(CONFIG, Map, aoi_geometry_104ha):
+    Map.centerObject(aoi_geometry_104ha, CONFIG['zoom_level'])
     return
 
 
@@ -226,15 +226,15 @@ def _():
 
 
 @app.cell
-def _(CONFIG, L8_collection, aoi_geometry_10ha, ee, mo):
+def _(CONFIG, L8_collection, aoi_geometry_104ha, ee, mo):
     # Create the 2024-2025 collection
     L8_collection_2024 = (ee.ImageCollection(CONFIG['satellite'])
         .filterDate('2024-01-01', '2025-01-01')
-        .filterBounds(aoi_geometry_10ha)
+        .filterBounds(aoi_geometry_104ha)
         .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', CONFIG['cloud_threshold'])))
 
     # Create median composite
-    median_composite_2024 = L8_collection_2024.median().clip(aoi_geometry_10ha)
+    median_composite_2024 = L8_collection_2024.median().clip(aoi_geometry_104ha)
 
     # Check how many images were used
     image_count_2022 = L8_collection.size().getInfo()
