@@ -53,14 +53,6 @@ def _(mo):
 
 
 @app.cell
-def _():
-    ## Demo Video showcasing authenticity
-    ## Add small procedure for Professor to run the same project
-    ## The Professor is the one reviewing the professor
-    return
-
-
-@app.cell
 def _(os):
     # Configuration parameters
     CONFIG = {
@@ -185,9 +177,9 @@ def _(Map, median_composite, vis_params_rgb):
 
 
 @app.cell
-def _(Map, aoi_geometry_10ha):
+def _(Map, aoi_geometry_104ha):
     Map.addLayer(
-        aoi_geometry_10ha, 
+        aoi_geometry_104ha, 
         {'color': 'FF0000', 'fillColor': '00000000'}, # Red outline, transparent fill
         'AOI Boundary'
     )
@@ -221,11 +213,6 @@ def _(mo):
 
 
 @app.cell
-def _():
-    return
-
-
-@app.cell
 def _(CONFIG, L8_collection, aoi_geometry_104ha, ee, mo):
     # Create the 2024-2025 collection
     L8_collection_2024 = (ee.ImageCollection(CONFIG['satellite'])
@@ -249,11 +236,6 @@ def _(CONFIG, L8_collection, aoi_geometry_104ha, ee, mo):
 
 
 @app.cell
-def _():
-    return
-
-
-@app.cell
 def _(median_composite, median_composite_2024):
     # Calculate NDVI for 2022-2023 (using existing median_composite)
     ndvi_2022 = median_composite.normalizedDifference(['B8', 'B4']).rename('NDVI_2022')
@@ -274,7 +256,7 @@ def _(median_composite, median_composite_2024):
 @app.cell
 def _(
     CONFIG,
-    aoi_geometry_10ha,
+    aoi_geometry_104ha,
     geemap,
     ndvi_2022,
     ndvi_2024,
@@ -315,22 +297,17 @@ def _(
 
     # Add AOI boundary
     change_map.addLayer(
-        aoi_geometry_10ha,
+        aoi_geometry_104ha,
         {'color': 'FF0000', 'fillColor': '00000000'},
         'AOI Boundary'
     )
 
-    change_map.centerObject(aoi_geometry_10ha, CONFIG['zoom_level'])
+    change_map.centerObject(aoi_geometry_104ha, CONFIG['zoom_level'])
     return
 
 
 @app.cell
-def _():
-    return
-
-
-@app.cell
-def _(CONFIG, aoi_geometry_10ha, ee, ndvi_2022, ndvi_2024, ndvi_change, pl):
+def _(CONFIG, aoi_geometry_104ha, ee, ndvi_2022, ndvi_2024, ndvi_change, pl):
     # Calculate statistics for both periods
     stats_2022 = ndvi_2022.reduceRegion(
         reducer=ee.Reducer.mean().combine(
@@ -338,7 +315,7 @@ def _(CONFIG, aoi_geometry_10ha, ee, ndvi_2022, ndvi_2024, ndvi_change, pl):
         ).combine(
             ee.Reducer.minMax(), '', True
         ),
-        geometry=aoi_geometry_10ha,
+        geometry=aoi_geometry_104ha,
         scale=CONFIG['scale'],
         maxPixels=CONFIG['max_pixels']
     ).getInfo()
@@ -349,7 +326,7 @@ def _(CONFIG, aoi_geometry_10ha, ee, ndvi_2022, ndvi_2024, ndvi_change, pl):
         ).combine(
             ee.Reducer.minMax(), '', True
         ),
-        geometry=aoi_geometry_10ha,
+        geometry=aoi_geometry_104ha,
         scale=CONFIG['scale'],
         maxPixels=CONFIG['max_pixels']
     ).getInfo()
@@ -361,7 +338,7 @@ def _(CONFIG, aoi_geometry_10ha, ee, ndvi_2022, ndvi_2024, ndvi_change, pl):
         ).combine(
             ee.Reducer.minMax(), '', True
         ),
-        geometry=aoi_geometry_10ha,
+        geometry=aoi_geometry_104ha,
         scale=CONFIG['scale'],
         maxPixels=CONFIG['max_pixels']
     ).getInfo()
@@ -390,11 +367,11 @@ def _(CONFIG, aoi_geometry_10ha, ee, ndvi_2022, ndvi_2024, ndvi_change, pl):
 
 
 @app.cell
-def _(CONFIG, alt, aoi_geometry_10ha, ee, ndvi_change, pl):
+def _(CONFIG, alt, aoi_geometry_104ha, ee, ndvi_change, pl):
     # Calculate histogram of changes
     change_histogram = ndvi_change.reduceRegion(
         reducer=ee.Reducer.histogram(maxBuckets=100),
-        geometry=aoi_geometry_10ha,
+        geometry=aoi_geometry_104ha,
         scale=CONFIG['scale'],
         maxPixels=CONFIG['max_pixels']
     ).getInfo()
@@ -429,7 +406,7 @@ def _(CONFIG, alt, aoi_geometry_10ha, ee, ndvi_change, pl):
 
 
 @app.cell
-def _(CONFIG, alt, aoi_geometry_10ha, ee, mo, ndvi_change, pl):
+def _(CONFIG, alt, aoi_geometry_104ha, ee, mo, ndvi_change, pl):
 
     # Define change categories
     vegetation_loss_strong = ndvi_change.lt(-0.2)
@@ -443,35 +420,35 @@ def _(CONFIG, alt, aoi_geometry_10ha, ee, mo, ndvi_change, pl):
 
     area_loss_strong = vegetation_loss_strong.multiply(pixel_area).reduceRegion(
         reducer=ee.Reducer.sum(),
-        geometry=aoi_geometry_10ha,
+        geometry=aoi_geometry_104ha,
         scale=CONFIG['scale'],
         maxPixels=CONFIG['max_pixels']
     ).getInfo()
 
     area_loss_moderate = vegetation_loss_moderate.multiply(pixel_area).reduceRegion(
         reducer=ee.Reducer.sum(),
-        geometry=aoi_geometry_10ha,
+        geometry=aoi_geometry_104ha,
         scale=CONFIG['scale'],
         maxPixels=CONFIG['max_pixels']
     ).getInfo()
 
     area_no_change = no_change.multiply(pixel_area).reduceRegion(
         reducer=ee.Reducer.sum(),
-        geometry=aoi_geometry_10ha,
+        geometry=aoi_geometry_104ha,
         scale=CONFIG['scale'],
         maxPixels=CONFIG['max_pixels']
     ).getInfo()
 
     area_gain_moderate = vegetation_gain_moderate.multiply(pixel_area).reduceRegion(
         reducer=ee.Reducer.sum(),
-        geometry=aoi_geometry_10ha,
+        geometry=aoi_geometry_104ha,
         scale=CONFIG['scale'],
         maxPixels=CONFIG['max_pixels']
     ).getInfo()
 
     area_gain_strong = vegetation_gain_strong.multiply(pixel_area).reduceRegion(
         reducer=ee.Reducer.sum(),
-        geometry=aoi_geometry_10ha,
+        geometry=aoi_geometry_104ha,
         scale=CONFIG['scale'],
         maxPixels=CONFIG['max_pixels']
     ).getInfo()
@@ -523,14 +500,9 @@ def _(CONFIG, alt, aoi_geometry_10ha, ee, mo, ndvi_change, pl):
 
 
 @app.cell
-def _():
-    return
-
-
-@app.cell
 def _(
     CONFIG,
-    aoi_geometry_10ha,
+    aoi_geometry_104ha,
     geemap,
     median_composite,
     median_composite_2024,
@@ -556,8 +528,8 @@ def _(
         shown=False
     )
 
-    comparison_map.addLayer(aoi_geometry_10ha, {'color': 'FF0000'}, 'AOI')
-    comparison_map.centerObject(aoi_geometry_10ha, CONFIG['zoom_level'])
+    comparison_map.addLayer(aoi_geometry_104ha, {'color': 'FF0000'}, 'AOI')
+    comparison_map.centerObject(aoi_geometry_104ha, CONFIG['zoom_level'])
 
     mo.Html(comparison_map.to_html())
     return
@@ -565,7 +537,7 @@ def _(
 
 @app.cell
 def _(
-    aoi_geometry_10ha,
+    aoi_geometry_104ha,
     area_gain_moderate,
     area_gain_strong,
     area_loss_moderate,
@@ -576,7 +548,7 @@ def _(
 ):
 
 
-    total_area = aoi_geometry_10ha.area().divide(10000).getInfo()  # in hectares
+    total_area = aoi_geometry_104ha.area().divide(10000).getInfo()  # in hectares
 
     vegetation_loss_area = (area_loss_strong.get('NDVI_Change', 0) + 
                            area_loss_moderate.get('NDVI_Change', 0)) / 10000

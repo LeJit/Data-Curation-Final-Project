@@ -6,6 +6,9 @@ This repository contains all the code and technical artifacts for my course proj
 
 # Project Setup Instructions 
 
+> [!IMPORTANT]
+>For detailed instructions on running this project in a **reproducible Docker environment**, please refer to the [Reproducibility Guide](reproducibility.md).
+
 ## Google Cloud Authentication
 
 To authenticate with Google Cloud, you will need to create a service account with the `Google Cloud Project` that has Earth Engine enabled. Follow the instructions provided by [Google Earth Engine](https://developers.google.com/earth-engine/guides/access) to either create a new GCP project or use an existing one with GEE.
@@ -36,9 +39,11 @@ In particular, you will need to provide the name of the `Google Cloud Project` t
 
 The general workflow is described in the below diagram. A _GeoJSON_ polygon describing a bounding box around the __X.ai Colossus Data Center__ in Memphis, Tennessee is created using [GeoJSON.io](https://geojson.io/). 
 
-The `GeoJSON` polygon is then used to create an __Area of Interest (AOI)__ that can be used as input to __Google Earth Engine__ and __Cecil Earth__.
+The `GeoJSON` polygon is then used to create an __Area of Interest (AOI)__ that can be used as input to __Google Earth Engine__ and __Cecil Earth__. In __Cecil Earth__, the `GeoJSON` polygon is used to create an `AOI` object in Cecil with its own unique `aoi_id`. With this `aoi_id` and a `dataset_id`, we can create data requests through the __Cecil platform__ to retrieve the relevant data.
 
+Similarly in the __Google Earth Engine__ workflow, we use the `GeoJSON` polygon to filter satellite images from the _Sentinal 2_ satellite to only the region surrounding the Colossus Data Center. From this data, we can compute the _Normalized Difference
 
+The two datasets are then joined together
 
 ```mermaid
 graph TD
@@ -53,8 +58,6 @@ graph TD
 
 To get started with this project, a new user should first execute `cecil_datasets.py` to set up the necessary Cecil Earth resources and register the Area of Interest. Following this, `earth_engine_test.py` should be run to authenticate with Google Earth Engine, explore initial data, and validate the AOI and cloud conditions. Finally, `combined_analysis.py` can be executed to perform the core temporal geospatial analysis, combining data from both platforms and generating the final report and metadata.
 
-
-
 ---
 
 ## Datasets and other Artifacts
@@ -67,12 +70,13 @@ The `GeoJSON` polygon is stored in `data/colossus.geojson`.
 
 ### Google Earth Engine
 
+An brief analysis of the _GEE_ data is provided in `earth_engine_test.py`. However, the execution of this file is optional and is not a prerequisite for running the main analysis in `combined_analysis.py`. 
+
+Due to data sharing restrictions, we cannot save the clipped Google Earth Engine data to disk. 
 
 ### Cecil Earth Datasets
 
 Since _Cecil_ caches dataset requests by a `Subscription ID` and `User Credentials`, the Cecil dataset requests are created in `cecil_datasets.py`, and the `Subscription` metadata for each dataset request is stored  in `data/processed/cecil.json`.
-
-
 
 ---
 

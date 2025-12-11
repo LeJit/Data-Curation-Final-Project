@@ -8,7 +8,6 @@ app = marimo.App(width="medium")
 def _():
     import marimo as mo
     import ee
-    import geemap
     import cecil
     import xarray as xr
     import polars as pl
@@ -17,12 +16,31 @@ def _():
     import pystac
     import json
     import os
+    import tempfile
+    import requests
+    import rioxarray
     from datetime import datetime
     from pathlib import Path
     from dotenv import load_dotenv
 
     load_dotenv()
-    return Path, alt, cecil, datetime, ee, json, mo, np, os, pl, pystac, xr
+    return (
+        Path,
+        alt,
+        cecil,
+        datetime,
+        ee,
+        json,
+        mo,
+        np,
+        os,
+        pl,
+        pystac,
+        requests,
+        rioxarray,
+        tempfile,
+        xr,
+    )
 
 
 @app.cell
@@ -42,11 +60,11 @@ def _(mo):
 
 
 @app.cell
-def _(ee, json, os):
+def _(Path, ee, json, os):
     # Configuration
     CONFIG = {
         'project_id': os.getenv('GEE_PROJECT_ID'), 
-        'geojson_path': 'data/colossus.json',
+        'geojson_path': Path('data/colossus.json'),
         'cecil_dataset_id': '89d81a76-3c42-4365-92c2-c1b8a00aacd5',
         'date_start_1': '2022-01-01',
         'date_end_1': '2023-01-01',
@@ -119,10 +137,6 @@ def _(CONFIG, aoi_geometry, ee):
         composite = collection.median().clip(aoi_geometry)
         ndvi = composite.normalizedDifference(['B8', 'B4']).rename('NDVI')
 
-        import tempfile
-        import rioxarray
-        import requests
-
         # Get download URL directly from EE (uses your authenticated project)
         url = ndvi.getDownloadURL({
             'scale': CONFIG['scale'],
@@ -141,6 +155,7 @@ def _(CONFIG, aoi_geometry, ee):
         # Load the file
         ds = rioxarray.open_rasterio(tmp_file).to_dataset(name='NDVI')
 
+        # Clean up
         # Clean up
         import os
         os.remove(tmp_file)
@@ -185,8 +200,6 @@ def _(np, xr):
             ee_spatial = ee_data['NDVI']
 
         # Set up CRS for both datasets
-        import rioxarray
-
         # Cecil is in Web Mercator (EPSG:3857) based on coordinate values
         cecil_with_crs = cecil_static[var_name].rio.write_crs("EPSG:3857", inplace=True)
 
@@ -405,6 +418,7 @@ def _(map_land_cover_names, mo, pl, stats_22, stats_24):
 def _(
     CONFIG,
     Path,
+    aoi_geometry,
     changes_df,
     chart_comparison,
     combined_22,
@@ -492,11 +506,18 @@ def _(
         metadata_dir = Path("data/metadata")
         metadata_dir.mkdir(parents=True, exist_ok=True)
 
+        # Get Geometry and BBox
+        geom_info = aoi_geometry.getInfo()
+        bounds = aoi_geometry.bounds().getInfo()['coordinates'][0]
+        xs = [p[0] for p in bounds]
+        ys = [p[1] for p in bounds]
+        bbox = [min(xs), min(ys), max(xs), max(ys)]
+
         item_id = f"combined-analysis-{period_label}-{timestamp}"
         stac_item = pystac.Item(
             id=item_id,
-            geometry=None, 
-            bbox=None,
+            geometry=geom_info,
+            bbox=bbox,
             datetime=datetime.now(),
             properties={
                 "period": period_label,

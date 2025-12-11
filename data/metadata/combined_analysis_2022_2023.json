@@ -2,20 +2,52 @@
   "type": "Feature",
   "stac_version": "1.1.0",
   "stac_extensions": [],
-  "id": "combined-analysis-2022_2023-20251209_012526",
-  "geometry": null,
+  "id": "combined-analysis-2022_2023-20251210_221250",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -90.04038044594203,
+          34.991999431916426
+        ],
+        [
+          -90.02962540989337,
+          34.991999431916426
+        ],
+        [
+          -90.02962540989337,
+          35.001573785257676
+        ],
+        [
+          -90.04038044594203,
+          35.001573785257676
+        ],
+        [
+          -90.04038044594203,
+          34.991999431916426
+        ]
+      ]
+    ]
+  },
+  "bbox": [
+    -90.04038044594203,
+    34.991999431916405,
+    -90.02962540989338,
+    35.00157390382796
+  ],
   "properties": {
     "period": "2022_2023",
     "platform": "Sentinel-2",
     "cecil:subscription_id": "89d81a76-3c42-4365-92c2-c1b8a00aacd5",
     "cecil:documentation": "https://docs.cecil.earth/Land-Cover-9-Class-111ef16bbbe481c0bb41e6e79ec441c8",
     "colossus:wikipedia": "https://en.wikipedia.org/wiki/Colossus_(supercomputer)",
-    "datetime": "2025-12-09T01:25:26.088734Z"
+    "datetime": "2025-12-10T22:12:51.689344Z"
   },
   "links": [],
   "assets": {
     "report": {
-      "href": "outputs/reports/temporal_report_20251209_012526.md",
+      "href": "outputs/reports/final_report_20251210_221250.md",
       "type": "text/markdown",
       "title": "Analysis Report"
     }
