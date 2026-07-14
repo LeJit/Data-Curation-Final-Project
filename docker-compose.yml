@@ -1,0 +1,19 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: final-project
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount the entire project for live development
+      - .:/app
+    # Copy .env.example to .env and fill in your API keys before running
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Override default command if needed
+    # command: uv run marimo edit --host 0.0.0.0 --port 8080 earth_engine_test.py
