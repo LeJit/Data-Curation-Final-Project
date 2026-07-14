@@ -28,7 +28,7 @@ jobs:
     - name: Install UV
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
-        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
     
     - name: Verify UV installation
       run: uv --version
@@ -113,5 +113,5 @@ jobs:
     
     - name: Test docker-compose
       run: |
-        docker-compose config
+        docker compose config
         echo "Docker Compose configuration is valid"
